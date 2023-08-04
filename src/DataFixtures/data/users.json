@@ -1,5 +1,12 @@
 [
   {
+    "firstname": "User",
+    "name": "User",
+    "email": "user@oc-p7.fr",
+    "phone": "0606060606",
+    "address": "1 rue des users, 75006 Paris"
+  },
+  {
     "firstname": "Nicolas",
     "name": "Dupont",
     "email": "nicolas.dupont@oc-p7.fr",

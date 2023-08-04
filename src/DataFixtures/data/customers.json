@@ -1,5 +1,14 @@
 [
   {
+    "firstname": "Customer",
+    "name": "Customer",
+    "email": "customer@oc-p7.fr",
+    "phone": "0707070707",
+    "address": "1 rue des customers, 75001 Paris",
+    "companyName": "Phone Globe",
+    "companySiret": "98765432101234"
+  },
+  {
     "firstname": "Alice",
     "name": "Dubois",
     "email": "alice.dubois@oc-p7.fr",
