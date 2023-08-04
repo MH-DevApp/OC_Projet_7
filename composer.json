@@ -28,6 +28,7 @@
         "symfony/serializer": "5.4.*",
         "symfony/translation": "5.4.*",
         "symfony/twig-bundle": "5.4.*",
+        "symfony/uid": "5.4.*",
         "symfony/validator": "5.4.*",
         "symfony/yaml": "5.4.*",
         "twig/extra-bundle": "^2.12|^3.0",
@@ -71,6 +72,18 @@
             "cache:clear": "symfony-cmd",
             "assets:install %PUBLIC_DIR%": "symfony-cmd"
         },
+        "load": [
+            "symfony console d:d:d -f --if-exists --env=dev",
+            "symfony console d:d:c --env=dev",
+            "symfony console d:s:u --complete -f --env=dev",
+            "symfony console d:f:l -n --env=dev"
+        ],
+        "docker-load": [
+            "docker exec -it php symfony console d:d:d -f --if-exists --env=dev",
+            "docker exec -it php symfony console d:d:c --env=dev",
+            "docker exec -it php symfony console d:s:u --complete -f --env=dev",
+            "docker exec -it php symfony console d:f:l -n --env=dev"
+        ],
         "post-install-cmd": [
             "@auto-scripts"
         ],
