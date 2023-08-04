@@ -1,0 +1,29 @@
+[
+  {
+    "firstname": "Alice",
+    "name": "Dubois",
+    "email": "alice.dubois@oc-p7.fr",
+    "phone": "0678901234",
+    "address": "123 Rue de la Liberté, 75001 Paris",
+    "companyName": "Phone Globe",
+    "companySiret": "98765432101234"
+  },
+  {
+    "firstname": "Julien",
+    "name": "Lefebvre",
+    "email": "julien.lefebvre@oc-p7.fr",
+    "phone": "0623456789",
+    "address": "456 Avenue des Champs-Élysées, 75008 Paris",
+    "companyName": "Phone Globe",
+    "companySiret": "98765432101234"
+  },
+  {
+    "firstname": "Emma",
+    "name": "Martin",
+    "email": "emma.martin@oc-p7.fr",
+    "phone": "0712345678",
+    "address": "789 Rue du Faubourg Saint-Honoré, 75008 Paris",
+    "companyName": "Phone Globe",
+    "companySiret": "98765432101234"
+  }
+]
