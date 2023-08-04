@@ -11,6 +11,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Uid\UuidV6;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\InheritanceType('JOINED')]
+#[ORM\DiscriminatorColumn(name: 'class_name', type: 'string')]
+#[ORM\DiscriminatorMap(['User' => User::class, 'Customer' => Customer::class])]
 #[UniqueEntity('email', message: 'Cette adresse email existe déjà, veuillez en saisir une nouvelle.')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {

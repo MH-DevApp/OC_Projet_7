@@ -10,14 +10,8 @@ use Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator;
 use Symfony\Component\Uid\UuidV6;
 
 #[ORM\Entity(repositoryClass: CustomerRepository::class)]
-class Customer
+class Customer extends User
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
-    #[ORM\CustomIdGenerator(class: UuidGenerator::class)]
-    #[ORM\Column(type: 'uuid', unique: true)]
-    private ?UuidV6 $id = null;
-
     #[ORM\Column(length: 255)]
     private ?string $companyName = null;
 
@@ -30,11 +24,6 @@ class Customer
     public function __construct()
     {
         $this->users = new ArrayCollection();
-    }
-
-    public function getId(): ?UuidV6
-    {
-        return $this->id;
     }
 
     public function getCompanyName(): ?string
