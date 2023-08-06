@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\Product;
-use App\Repository\ProductRepository;
+use App\Entity\Customer;
+use App\Repository\UserRepository;
 use App\Utils\Pagination;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
@@ -15,12 +15,13 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-#[OA\Tag(name: 'Products')]
-#[Route('/api/products')]
-class ProductController extends AbstractController
+#[OA\Tag(name: 'Customer')]
+#[Route('/api/customer')]
+class CustomerController extends AbstractController
 {
+
     #[OA\Get(
-        path: '/api/products',
+        path: '/api/customer/users',
         parameters: [
             new OA\Parameter(
                 name: 'page',
@@ -38,29 +39,30 @@ class ProductController extends AbstractController
             )
         ]
     )]
-    #[Route('', name: 'products', methods: ['GET'])]
-    public function getProductsList(
+    #[Route('/users', name: 'customer_users', methods: ['GET'])]
+    public function index(
         Request $request,
-        ProductRepository $productRepository,
+        UserRepository $userRepository,
         SerializerInterface $serializer,
         UrlGeneratorInterface $urlGenerator
     ): JsonResponse
     {
-        $countProducts = $productRepository->count([]);
 
-        $valueParamsToPagination = Pagination::getValueParamsToPagination($request, $countProducts, $urlGenerator);
+        $countUsers = $userRepository->count([
+            'customer' => $this->getUser(),
+        ]);
 
-        $products = $productRepository->findBy(
-            [],
-            limit: $valueParamsToPagination["limit"],
-            offset: $valueParamsToPagination["offset"]
-        );
+        $valueParamsToPagination = Pagination::getValueParamsToPagination($request, $countUsers, $urlGenerator);
 
+        $users = $userRepository->findBy([
+            'customer' => $this->getUser()
+        ], limit: $valueParamsToPagination["limit"], offset: $valueParamsToPagination["offset"]);
         $context = SerializationContext::create()
+            ->setGroups(['getUsersByCustomer'])
             ->setSerializeNull(true);
 
         $jsonProductsList = $serializer->serialize([
-            "total_items_page" => count($products),
+            "total_items_page" => count($users),
             ...array_filter(
                 $valueParamsToPagination,
                 function ($item, $key) {
@@ -68,45 +70,11 @@ class ProductController extends AbstractController
                 },
                 ARRAY_FILTER_USE_BOTH
             ),
-            'data' => $products,
-        ],
-            'json',
-            $context
-        );
+            'data' => $users,
+        ], 'json', $context);
 
         return new JsonResponse(
             $jsonProductsList,
-            Response::HTTP_OK,
-            [],
-            true
-        );
-    }
-
-    #[OA\Get(
-        path: '/api/products/{id}',
-        parameters: [
-            new OA\Parameter(
-                name: 'id',
-                in: 'path',
-                schema: new OA\Schema(type: 'string'),
-                example: "1ee33165-a193-6d0c-be5b-a7cf585beb7d"
-            )
-        ]
-    )]
-    #[Route('/{id}', name: 'products_details', methods: ['GET'])]
-    public function getProductsDetails(
-        ?Product $product,
-        SerializerInterface $serializer
-    ): JsonResponse
-    {
-        if (!$product) {
-            throw $this->createNotFoundException();
-        }
-
-        $jsonProduct = $serializer->serialize($product, 'json');
-
-        return new JsonResponse(
-            $jsonProduct,
             Response::HTTP_OK,
             [],
             true

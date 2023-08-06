@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation\Groups;
 use Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -21,9 +22,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: UuidGenerator::class)]
     #[ORM\Column(type: 'uuid', unique: true)]
+    #[Groups(["getUsersByCustomer"])]
     private ?UuidV6 $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
+    #[Groups(["getUsersByCustomer"])]
     private ?string $email = null;
 
     #[ORM\Column]
@@ -33,18 +36,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["getUsersByCustomer"])]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["getUsersByCustomer"])]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 30, nullable: true)]
+    #[Groups(["getUsersByCustomer"])]
     private ?string $phone = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["getUsersByCustomer"])]
     private ?string $address = null;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
+    #[Groups(["getUsersByCustomer"])]
     private ?Customer $customer = null;
 
     public function getId(): ?UuidV6
