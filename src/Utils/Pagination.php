@@ -16,7 +16,7 @@ abstract class Pagination {
      * @param int $countItems
      * @param UrlGeneratorInterface $urlGenerator
      *
-     * @return array<string, int>
+     * @return array<string, int|string|null>
      */
     public static function getValueParamsToPagination(
         Request $request,
@@ -62,8 +62,8 @@ abstract class Pagination {
             $paramsToUrlGenerate['query']['limit'] = $limit;
         }
 
-        $offset = ($page - 1) * $limit;
-        $totalPages = ceil($countItems / $limit);
+        $offset = (int) (($page - 1) * $limit);
+        $totalPages = (int) ceil($countItems / $limit);
 
         if ($page > $totalPages) {
             throw new NotFoundHttpException("Page not found");
