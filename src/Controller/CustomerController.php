@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\Customer;
+use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Utils\Pagination;
 use JMS\Serializer\SerializationContext;
@@ -40,7 +40,7 @@ class CustomerController extends AbstractController
         ]
     )]
     #[Route('/users', name: 'customer_users', methods: ['GET'])]
-    public function index(
+    public function showListUsers(
         Request $request,
         UserRepository $userRepository,
         SerializerInterface $serializer,
@@ -75,6 +75,40 @@ class CustomerController extends AbstractController
 
         return new JsonResponse(
             $jsonProductsList,
+            Response::HTTP_OK,
+            [],
+            true
+        );
+    }
+
+    #[OA\Get(
+        path: '/api/customer/users/{id}',
+        parameters: [
+            new OA\Parameter(
+                name: 'id',
+                in: 'path',
+                schema: new OA\Schema(type: 'string'),
+                example: "1ee33165-b02c-6080-b323-a7cf585beb7d"
+            )
+        ]
+    )]
+    #[Route('/users/{id}', name: 'customer_details_user', methods: ['GET'])]
+    public function showDetailsUser(
+        ?User $user,
+        SerializerInterface $serializer
+    ): JsonResponse
+    {
+        if (!$user || $user->getCustomer() !== $this->getUser()) {
+            throw $this->createNotFoundException("Page not found");
+        }
+
+        $context = SerializationContext::create()
+            ->setGroups(['getUsersByCustomer']);
+
+        $jsonUser = $serializer->serialize($user, 'json', $context);
+
+        return new JsonResponse(
+            $jsonUser,
             Response::HTTP_OK,
             [],
             true

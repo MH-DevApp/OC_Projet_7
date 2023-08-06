@@ -100,7 +100,7 @@ class ProductController extends AbstractController
     ): JsonResponse
     {
         if (!$product) {
-            throw $this->createNotFoundException();
+            throw $this->createNotFoundException("Page not found");
         }
 
         $jsonProduct = $serializer->serialize($product, 'json');
