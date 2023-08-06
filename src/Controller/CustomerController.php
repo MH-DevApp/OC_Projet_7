@@ -5,6 +5,10 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Utils\Pagination;
+use Doctrine\ORM\EntityManagerInterface;
+use JMS\Serializer\DeserializationContext;
+use JMS\Serializer\Metadata\ClassMetadata;
+use JMS\Serializer\Metadata\PropertyMetadata;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use OpenApi\Attributes as OA;
@@ -12,8 +16,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[OA\Tag(name: 'Customer')]
 #[Route('/api/customer')]
@@ -56,13 +62,13 @@ class CustomerController extends AbstractController
 
         $users = $userRepository->findBy([
             'customer' => $this->getUser()
-        ], limit: $valueParamsToPagination["limit"], offset: $valueParamsToPagination["offset"]);
+        ], limit: $valueParamsToPagination['limit'], offset: $valueParamsToPagination['offset']);
         $context = SerializationContext::create()
             ->setGroups(['getUsersByCustomer'])
             ->setSerializeNull(true);
 
         $jsonProductsList = $serializer->serialize([
-            "total_items_page" => count($users),
+            'total_items_page' => count($users),
             ...array_filter(
                 $valueParamsToPagination,
                 function ($item, $key) {
@@ -99,7 +105,7 @@ class CustomerController extends AbstractController
     ): JsonResponse
     {
         if (!$user || $user->getCustomer() !== $this->getUser()) {
-            throw $this->createNotFoundException("Page not found");
+            throw $this->createNotFoundException('Page not found');
         }
 
         $context = SerializationContext::create()
@@ -112,6 +118,127 @@ class CustomerController extends AbstractController
             Response::HTTP_OK,
             [],
             true
+        );
+    }
+
+    #[OA\Post(
+        path: '/api/customer/users/new',
+        requestBody: new OA\RequestBody(
+            content: new OA\JsonContent(
+                required: [
+                    "firstname",
+                    "lastname",
+                    "email",
+                    "password"
+                ],
+                properties: [
+                    new OA\Property(
+                        property: "firstname",
+                        type: "string",
+                        example: "Jean"
+                    ),
+                    new OA\Property(
+                        property: "lastname",
+                        type: "string",
+                        example: "Dupont"
+                    ),
+                    new OA\Property(
+                        property: "email",
+                        type: "string",
+                        example: "jean.dupont@oc-p7.fr"
+                    ),
+                    new OA\Property(
+                        property: "password",
+                        type: "string",
+                        format: "password",
+                        maxLength: 20,
+                        minLength: 8,
+                        example: "Mot2p@ass3"
+                    ),
+                    new OA\Property(
+                        property: "phone",
+                        type: "string",
+                        example: "0680124121"
+                    ),
+                    new OA\Property(
+                        property: "address",
+                        type: "string",
+                        example: "10 rue de la paix, 75001 Paris"
+                    )
+                ],
+                type: "object"
+            )
+        ),
+    )]
+    #[Route('/users/new', name: 'customer_add_user', methods: ['POST'])]
+    public function addUser(
+        Request $request,
+        SerializerInterface $serializer,
+        ValidatorInterface $validator,
+        UserPasswordHasherInterface $passwordHasher,
+        EntityManagerInterface $em
+    ): JsonResponse
+    {
+        $content = $serializer->serialize(
+            [
+                'class_name' => 'User',
+                ...$request->toArray()
+            ], 'json'
+        );
+
+        /**
+         * @var User $user
+         */
+        $user = $serializer->deserialize(
+            $content,
+            User::class,
+            'json'
+        );
+
+        $errors = $validator->validate($user);
+
+        if ($errors->count()) {
+            $errorsArray = [];
+
+            foreach ($errors as $key => $error) {
+                $errorsArray[$key] = $error->getMessage();
+            }
+
+            return new JsonResponse(
+                $errorsArray,
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+
+        $user
+            ->setCustomer($this->getUser())
+            ->setPassword($passwordHasher->hashPassword(
+                $user,
+                $user->getPassword()
+            ));
+
+        $em->persist($user);
+        $em->flush();
+
+        $context = SerializationContext::create()
+            ->setGroups('getUsersByCustomer')
+            ->setSerializeNull(true);
+
+        $jsonUser = $serializer->serialize($user, 'json', $context);
+
+        $location = $this->generateUrl(
+            'customer_details_user',
+            [
+                'id' => $user->getId()
+            ],
+            UrlGeneratorInterface::ABSOLUTE_URL
+        );
+
+        return new JsonResponse(
+            $jsonUser,
+            Response::HTTP_CREATED,
+            ['Location' => $location],
+            json: true
         );
     }
 }

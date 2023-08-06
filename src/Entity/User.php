@@ -10,6 +10,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Uid\UuidV6;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\InheritanceType('JOINED')]
@@ -22,37 +23,68 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: UuidGenerator::class)]
     #[ORM\Column(type: 'uuid', unique: true)]
-    #[Groups(["getUsersByCustomer"])]
+    #[Groups(['getUsersByCustomer'])]
     private ?UuidV6 $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(["getUsersByCustomer"])]
+    #[Groups(['getUsersByCustomer'])]
+    #[Assert\NotBlank(message: 'Une adresse email est obligatoire.')]
+    #[Assert\Email(message: 'L\'adresse email n\'est pas valide.')]
     private ?string $email = null;
 
     #[ORM\Column]
     private array $roles = [];
 
     #[ORM\Column]
+    #[Assert\NotBlank(message: 'Le mot de passe est obligatoire.')]
+    #[Assert\Length(
+        min: 8,
+        max: 20,
+        minMessage: 'Le mot de passe doit contenir au moins {{ limit }} caractères.',
+        maxMessage: 'Le mot de passe doit contenir au plus {{ limit }} caractères.'
+    )]
+    #[Assert\Regex(
+        pattern: '/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#\/\+\-\*\.])[a-zA-Z0-9@#\/\+\-\*]+$/',
+        message: 'Le mot de passe doit contenir au moins une minuscule, une majuscule, un chiffre et un caractère spécial (@#/*-+).'
+    )]
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["getUsersByCustomer"])]
+    #[Groups(['getUsersByCustomer'])]
+    #[Assert\NotBlank(message: 'Le prénom est obligatoire.')]
+    #[Assert\Length(
+        max: 255,
+        maxMessage: 'Le prénom ne doit pas dépasser {{ limit }} caractères.'
+    )]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["getUsersByCustomer"])]
+    #[Groups(['getUsersByCustomer'])]
+    #[Assert\NotBlank(message: 'Le nom est obligatoire.')]
+    #[Assert\Length(
+        max: 255,
+        maxMessage: 'Le nom ne doit pas dépasser {{ limit }} caractères.'
+    )]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 30, nullable: true)]
-    #[Groups(["getUsersByCustomer"])]
+    #[Groups(['getUsersByCustomer'])]
+    #[Assert\Length(
+        max: 30,
+        maxMessage: 'Le numéro de téléphone ne doit pas dépasser {{ limit }} caractères.'
+    )]
     private ?string $phone = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["getUsersByCustomer"])]
+    #[Groups(['getUsersByCustomer'])]
+    #[Assert\Length(
+        max: 255,
+        maxMessage: 'L\'adresse ne doit pas dépasser {{ limit }} caractères.'
+    )]
     private ?string $address = null;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
-    #[Groups(["getUsersByCustomer"])]
+    #[Groups(['getUsersByCustomer'])]
     private ?Customer $customer = null;
 
     public function getId(): ?UuidV6
