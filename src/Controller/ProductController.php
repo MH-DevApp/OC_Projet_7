@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Product;
 use App\Repository\ProductRepository;
+use App\Utils\Pagination;
+use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -11,6 +13,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[OA\Tag(name: 'Products')]
 #[Route('/api/products')]
@@ -39,26 +42,37 @@ class ProductController extends AbstractController
     public function getProductsList(
         Request $request,
         ProductRepository $productRepository,
-        SerializerInterface $serializer
+        SerializerInterface $serializer,
+        UrlGeneratorInterface $urlGenerator
     ): JsonResponse
     {
         $countProducts = $productRepository->count([]);
-        $page = $request->query->getInt('page');
-        $limit = $request->query->getInt('limit');
 
-        if (!$page) {
-            $page = 1;
-            if (!$limit) {
-                $limit = $countProducts;
-            }
-        } else if (!$limit) {
-            $limit = 5;
-        }
+        $valueParamsToPagination = Pagination::getValueParamsToPagination($request, $countProducts, $urlGenerator);
 
-        $offset = ($page - 1) * $limit;
+        $products = $productRepository->findBy(
+            [],
+            limit: $valueParamsToPagination["limit"],
+            offset: $valueParamsToPagination["offset"]
+        );
 
-        $products = $productRepository->findBy([], limit: $limit, offset: $offset);
-        $jsonProductsList = $serializer->serialize($products, 'json');
+        $context = SerializationContext::create()
+            ->setSerializeNull(true);
+
+        $jsonProductsList = $serializer->serialize([
+            "total_items_page" => count($products),
+            ...array_filter(
+                $valueParamsToPagination,
+                function ($item, $key) {
+                    return ($key !== 'limit' && $key !== 'offset') ? [$key => $item] : [];
+                },
+                ARRAY_FILTER_USE_BOTH
+            ),
+            'data' => $products,
+        ],
+            'json',
+            $context
+        );
 
         return new JsonResponse(
             $jsonProductsList,
