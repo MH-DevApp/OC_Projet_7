@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Product;
 use App\Repository\ProductRepository;
 use JMS\Serializer\SerializerInterface;
 use OpenApi\Attributes as OA;
@@ -61,6 +62,37 @@ class ProductController extends AbstractController
 
         return new JsonResponse(
             $jsonProductsList,
+            Response::HTTP_OK,
+            [],
+            true
+        );
+    }
+
+    #[OA\Get(
+        path: '/api/products/{id}',
+        parameters: [
+            new OA\Parameter(
+                name: 'id',
+                in: 'path',
+                schema: new OA\Schema(type: 'string'),
+                example: "1ee33165-a193-6d0c-be5b-a7cf585beb7d"
+            )
+        ]
+    )]
+    #[Route('/{id}', name: 'products_details', methods: ['GET'])]
+    public function getProductsDetails(
+        ?Product $product,
+        SerializerInterface $serializer
+    ): JsonResponse
+    {
+        if (!$product) {
+            throw $this->createNotFoundException();
+        }
+
+        $jsonProduct = $serializer->serialize($product, 'json');
+
+        return new JsonResponse(
+            $jsonProduct,
             Response::HTTP_OK,
             [],
             true
