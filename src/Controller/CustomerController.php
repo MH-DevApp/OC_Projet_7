@@ -122,7 +122,7 @@ class CustomerController extends AbstractController
     }
 
     #[OA\Post(
-        path: '/api/customer/users/new',
+        path: '/api/customer/users',
         requestBody: new OA\RequestBody(
             content: new OA\JsonContent(
                 required: [
@@ -170,7 +170,7 @@ class CustomerController extends AbstractController
             )
         ),
     )]
-    #[Route('/users/new', name: 'customer_add_user', methods: ['POST'])]
+    #[Route('/users', name: 'customer_add_user', methods: ['POST'])]
     public function addUser(
         Request $request,
         SerializerInterface $serializer,
@@ -239,6 +239,35 @@ class CustomerController extends AbstractController
             Response::HTTP_CREATED,
             ['Location' => $location],
             json: true
+        );
+    }
+    #[OA\Delete(
+        path: '/api/customer/users/{id}',
+        parameters: [
+            new OA\Parameter(
+                name: 'id',
+                in: 'path',
+                schema: new OA\Schema(type: 'string'),
+                example: "1ee33165-b02c-6080-b323-a7cf585beb7d"
+            )
+        ]
+    )]
+    #[Route('/users/{id}', name: 'customer_delete_user', methods: ['DELETE'])]
+    public function deleteUser(
+        ?User $user,
+        EntityManagerInterface $em
+    ): JsonResponse
+    {
+        if (!$user || $user->getCustomer() !== $this->getUser()) {
+            throw $this->createNotFoundException('Page not found');
+        }
+
+        $em->remove($user);
+        $em->flush();
+
+        return new JsonResponse(
+            null,
+            Response::HTTP_NO_CONTENT
         );
     }
 }
