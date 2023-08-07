@@ -49,6 +49,7 @@ class CustomerController extends AbstractController
         parameters: [
             new OA\Parameter(
                 name: 'page',
+                description: 'Paramètre concernant le numéro de page (optionnel)',
                 in: 'query',
                 required: false,
                 schema: new OA\Schema(type: 'integer'),
@@ -56,6 +57,7 @@ class CustomerController extends AbstractController
             ),
             new OA\Parameter(
                 name: 'limit',
+                description: 'Paramètre concernant le nombre d\'utilisateur par page (optionnel)',
                 in: 'query',
                 required: false,
                 schema: new OA\Schema(type: 'integer'),
@@ -65,15 +67,47 @@ class CustomerController extends AbstractController
         responses: [
             new OA\Response(
                 response: Response::HTTP_OK,
-                description: 'Retourne la liste des utilisateurs liées au demandeur.',
+                description: 'Retourne le nombre d\'utilisateurs dans la page, le nombre d\'utilisateurs dans la base de données, 
+                le nombre de page, la page précédente, la page suivante et la liste des utilisateurs liées au demandeur.',
                 content: new OA\JsonContent(
-                    type: 'array',
-                    items: new OA\Items(
-                        ref: new Model(
-                            type: User::class,
-                            groups: ['getUsersByCustomer']
+                    properties: [
+                        new OA\Property(
+                            property: 'total_items_page',
+                            type: 'integer',
+                            example: 5
+                        ),
+                        new OA\Property(
+                            property: 'total_items_collection',
+                            type: 'integer',
+                            example: 15
+                        ),
+                        new OA\Property(
+                            property: 'total_pages',
+                            type: 'integer',
+                            example: 3
+                        ),
+                        new OA\Property(
+                            property: 'previous_page',
+                            type: 'string',
+                            example: "https://localhost:3000/api/products?limit=5&page=1"
+                        ),
+                        new OA\Property(
+                            property: 'next_page',
+                            type: 'string',
+                            example: "https://localhost:3000/api/products?limit=5&page=3"
+                        ),
+                        new OA\Property(
+                            property: 'data',
+                            type: 'array',
+                            items: new OA\Items(
+                                ref: new Model(
+                                    type: User::class,
+                                    groups: ['getUsersByCustomer']
+                                )
+                            )
                         )
-                    )
+                    ],
+                    type: 'object'
                 )
             ),
             new OA\Response(
@@ -201,12 +235,12 @@ class CustomerController extends AbstractController
         description: '<b><u>Récupération du détail d\'un utilisateur</u>:</b><br><br>
             Cela aura pour effet de retourner un objet JSON contenant la clé et valeur de ses propriétés.<br><br>
             <b>NOTE: Le détail est retourné seulement si l\'utilisateur est dans la collection du demandeur (customer).</b>',
-        summary: 'Récupération du détails d\'un utilisateur à l\'aide de son identifiant, présent dans la collection
+        summary: 'Récupération du détail d\'un utilisateur à l\'aide de son identifiant, présent dans la collection
          du demandeur (customer).',
         parameters: [
             new OA\Parameter(
                 name: 'id',
-                description: 'Identifiant Uuid de l\'utilisateur que l\'on souhaite obtenir le détails des informations.',
+                description: 'Identifiant Uuid de l\'utilisateur que l\'on souhaite obtenir le détail des informations.',
                 in: 'path',
                 schema: new OA\Schema(type: 'string'),
                 example: '1ee33165-b02c-6080-b323-a7cf585beb7d'
@@ -215,7 +249,7 @@ class CustomerController extends AbstractController
         responses: [
             new OA\Response(
                 response: Response::HTTP_OK,
-                description: 'Retourne le détail de l\'utilisateur.',
+                description: 'Retourne le détail de l\'utilisateur sous forme d\'objet JSON.',
                 content: new OA\JsonContent(
                     ref: new Model(
                         type: User::class,
