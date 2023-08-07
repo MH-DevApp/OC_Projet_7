@@ -6,9 +6,6 @@ use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Utils\Pagination;
 use Doctrine\ORM\EntityManagerInterface;
-use JMS\Serializer\DeserializationContext;
-use JMS\Serializer\Metadata\ClassMetadata;
-use JMS\Serializer\Metadata\PropertyMetadata;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use OpenApi\Attributes as OA;
@@ -53,6 +50,7 @@ class CustomerController extends AbstractController
         UrlGeneratorInterface $urlGenerator
     ): JsonResponse
     {
+        $this->denyAccessUnlessGranted('USERS_VIEW');
 
         $countUsers = $userRepository->count([
             'customer' => $this->getUser(),
@@ -104,9 +102,11 @@ class CustomerController extends AbstractController
         SerializerInterface $serializer
     ): JsonResponse
     {
-        if (!$user || $user->getCustomer() !== $this->getUser()) {
+        if (!$user) {
             throw $this->createNotFoundException('Page not found');
         }
+
+        $this->denyAccessUnlessGranted('USER_VIEW', $user);
 
         $context = SerializationContext::create()
             ->setGroups(['getUsersByCustomer']);
@@ -179,6 +179,8 @@ class CustomerController extends AbstractController
         EntityManagerInterface $em
     ): JsonResponse
     {
+        $this->denyAccessUnlessGranted('USER_CREATE');
+
         $content = $serializer->serialize(
             [
                 'class_name' => 'User',
@@ -241,6 +243,7 @@ class CustomerController extends AbstractController
             json: true
         );
     }
+
     #[OA\Delete(
         path: '/api/customer/users/{id}',
         parameters: [
@@ -258,9 +261,11 @@ class CustomerController extends AbstractController
         EntityManagerInterface $em
     ): JsonResponse
     {
-        if (!$user || $user->getCustomer() !== $this->getUser()) {
+        if (!$user) {
             throw $this->createNotFoundException('Page not found');
         }
+
+        $this->denyAccessUnlessGranted('USER_DELETE', $user);
 
         $em->remove($user);
         $em->flush();
