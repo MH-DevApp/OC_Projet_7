@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use OpenApi\Attributes as OA;
+use Psr\Cache\InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,12 +18,17 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 #[OA\Tag(name: 'Customer')]
 #[Route('/api/customer')]
 class CustomerController extends AbstractController
 {
 
+    /**
+     * @throws InvalidArgumentException
+     */
     #[OA\Get(
         path: '/api/customer/users',
         parameters: [
@@ -47,7 +53,8 @@ class CustomerController extends AbstractController
         Request $request,
         UserRepository $userRepository,
         SerializerInterface $serializer,
-        UrlGeneratorInterface $urlGenerator
+        UrlGeneratorInterface $urlGenerator,
+        TagAwareCacheInterface $cachePool
     ): JsonResponse
     {
         $this->denyAccessUnlessGranted('USERS_VIEW');
@@ -58,33 +65,53 @@ class CustomerController extends AbstractController
 
         $valueParamsToPagination = Pagination::getValueParamsToPagination($request, $countUsers, $urlGenerator);
 
-        $users = $userRepository->findBy([
-            'customer' => $this->getUser()
-        ], limit: $valueParamsToPagination['limit'], offset: $valueParamsToPagination['offset']);
-        $context = SerializationContext::create()
-            ->setGroups(['getUsersByCustomer'])
-            ->setSerializeNull(true);
+        $idCache = 'getUsers-' .
+            ($valueParamsToPagination['offset'] + $valueParamsToPagination['limit']) / $valueParamsToPagination['limit'] .
+            '-' .
+            $valueParamsToPagination['limit'];
 
-        $jsonProductsList = $serializer->serialize([
-            'total_items_page' => count($users),
-            ...array_filter(
-                $valueParamsToPagination,
-                function ($item, $key) {
-                    return ($key !== 'limit' && $key !== 'offset') ? [$key => $item] : [];
-                },
-                ARRAY_FILTER_USE_BOTH
-            ),
-            'data' => $users,
-        ], 'json', $context);
+        $jsonUsersList = $cachePool->get(
+            $idCache,
+            function (ItemInterface $item) use ($userRepository, $valueParamsToPagination, $serializer) {
+                $item->tag('usersCache');
+
+                $users = $userRepository->findBy(
+                    [
+                    'customer' => $this->getUser()
+                    ],
+                    limit: $valueParamsToPagination['limit'],
+                    offset: $valueParamsToPagination['offset']
+                );
+
+                $context = SerializationContext::create()
+                    ->setGroups(['getUsersByCustomer'])
+                    ->setSerializeNull(true);
+
+                return $serializer->serialize([
+                    'total_items_page' => count($users),
+                    ...array_filter(
+                        $valueParamsToPagination,
+                        function ($item, $key) {
+                            return ($key !== 'limit' && $key !== 'offset') ? [$key => $item] : [];
+                        },
+                        ARRAY_FILTER_USE_BOTH
+                    ),
+                    'data' => $users,
+                ], 'json', $context);
+            }
+        );
 
         return new JsonResponse(
-            $jsonProductsList,
+            $jsonUsersList,
             Response::HTTP_OK,
             [],
             true
         );
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     #[OA\Get(
         path: '/api/customer/users/{id}',
         parameters: [
@@ -92,14 +119,15 @@ class CustomerController extends AbstractController
                 name: 'id',
                 in: 'path',
                 schema: new OA\Schema(type: 'string'),
-                example: "1ee33165-b02c-6080-b323-a7cf585beb7d"
+                example: '1ee33165-b02c-6080-b323-a7cf585beb7d'
             )
         ]
     )]
     #[Route('/users/{id}', name: 'customer_details_user', methods: ['GET'])]
     public function showDetailsUser(
         ?User $user,
-        SerializerInterface $serializer
+        SerializerInterface $serializer,
+        TagAwareCacheInterface $cachePool
     ): JsonResponse
     {
         if (!$user) {
@@ -108,10 +136,21 @@ class CustomerController extends AbstractController
 
         $this->denyAccessUnlessGranted('USER_VIEW', $user);
 
-        $context = SerializationContext::create()
-            ->setGroups(['getUsersByCustomer']);
+        $idCache = 'getUser-' . $user->getId();
 
-        $jsonUser = $serializer->serialize($user, 'json', $context);
+        $jsonUser = $cachePool->get(
+            $idCache,
+            function (ItemInterface $item) use ($user, $serializer) {
+                $item->tag('user-details-' . $user->getId() . '-cache');
+
+                $context = SerializationContext::create()
+                    ->setGroups(['getUsersByCustomer'])
+                    ->setSerializeNull(true);
+
+                return $serializer->serialize($user, 'json', $context);
+
+            }
+        );
 
         return new JsonResponse(
             $jsonUser,
@@ -121,52 +160,55 @@ class CustomerController extends AbstractController
         );
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     #[OA\Post(
         path: '/api/customer/users',
         requestBody: new OA\RequestBody(
             content: new OA\JsonContent(
                 required: [
-                    "firstname",
-                    "lastname",
-                    "email",
-                    "password"
+                    'firstname',
+                    'lastname',
+                    'email',
+                    'password'
                 ],
                 properties: [
                     new OA\Property(
-                        property: "firstname",
-                        type: "string",
-                        example: "Jean"
+                        property: 'firstname',
+                        type: 'string',
+                        example: 'Jean'
                     ),
                     new OA\Property(
-                        property: "lastname",
-                        type: "string",
-                        example: "Dupont"
+                        property: 'lastname',
+                        type: 'string',
+                        example: 'Dupont'
                     ),
                     new OA\Property(
-                        property: "email",
-                        type: "string",
-                        example: "jean.dupont@oc-p7.fr"
+                        property: 'email',
+                        type: 'string',
+                        example: 'jean.dupont@oc-p7.fr'
                     ),
                     new OA\Property(
-                        property: "password",
-                        type: "string",
-                        format: "password",
+                        property: 'password',
+                        type: 'string',
+                        format: 'password',
                         maxLength: 20,
                         minLength: 8,
-                        example: "Mot2p@ass3"
+                        example: 'Mot2p@ass3'
                     ),
                     new OA\Property(
-                        property: "phone",
-                        type: "string",
-                        example: "0680124121"
+                        property: 'phone',
+                        type: 'string',
+                        example: '0680124121'
                     ),
                     new OA\Property(
-                        property: "address",
-                        type: "string",
-                        example: "10 rue de la paix, 75001 Paris"
+                        property: 'address',
+                        type: 'string',
+                        example: '10 rue de la paix, 75001 Paris'
                     )
                 ],
-                type: "object"
+                type: 'object'
             )
         ),
     )]
@@ -176,7 +218,8 @@ class CustomerController extends AbstractController
         SerializerInterface $serializer,
         ValidatorInterface $validator,
         UserPasswordHasherInterface $passwordHasher,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        TagAwareCacheInterface $cachePool
     ): JsonResponse
     {
         $this->denyAccessUnlessGranted('USER_CREATE');
@@ -222,6 +265,8 @@ class CustomerController extends AbstractController
         $em->persist($user);
         $em->flush();
 
+        $cachePool->invalidateTags(['usersCache']);
+
         $context = SerializationContext::create()
             ->setGroups('getUsersByCustomer')
             ->setSerializeNull(true);
@@ -244,6 +289,9 @@ class CustomerController extends AbstractController
         );
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     #[OA\Delete(
         path: '/api/customer/users/{id}',
         parameters: [
@@ -251,14 +299,15 @@ class CustomerController extends AbstractController
                 name: 'id',
                 in: 'path',
                 schema: new OA\Schema(type: 'string'),
-                example: "1ee33165-b02c-6080-b323-a7cf585beb7d"
+                example: '1ee33165-b02c-6080-b323-a7cf585beb7d'
             )
         ]
     )]
     #[Route('/users/{id}', name: 'customer_delete_user', methods: ['DELETE'])]
     public function deleteUser(
         ?User $user,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        TagAwareCacheInterface $cachePool
     ): JsonResponse
     {
         if (!$user) {
@@ -269,6 +318,9 @@ class CustomerController extends AbstractController
 
         $em->remove($user);
         $em->flush();
+
+        $cachePool->invalidateTags(['usersCache']);
+        $cachePool->invalidateTags(['getUser-' . $user->getId()]);
 
         return new JsonResponse(
             null,

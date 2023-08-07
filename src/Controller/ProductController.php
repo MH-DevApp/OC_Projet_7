@@ -8,17 +8,23 @@ use App\Utils\Pagination;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use OpenApi\Attributes as OA;
+use Psr\Cache\InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 #[OA\Tag(name: 'Products')]
 #[Route('/api/products')]
 class ProductController extends AbstractController
 {
+    /**
+     * @throws InvalidArgumentException
+     */
     #[OA\Get(
         path: '/api/products',
         parameters: [
@@ -43,35 +49,48 @@ class ProductController extends AbstractController
         Request $request,
         ProductRepository $productRepository,
         SerializerInterface $serializer,
-        UrlGeneratorInterface $urlGenerator
+        UrlGeneratorInterface $urlGenerator,
+        TagAwareCacheInterface $cachePool
     ): JsonResponse
     {
         $countProducts = $productRepository->count([]);
 
         $valueParamsToPagination = Pagination::getValueParamsToPagination($request, $countProducts, $urlGenerator);
 
-        $products = $productRepository->findBy(
-            [],
-            limit: $valueParamsToPagination["limit"],
-            offset: $valueParamsToPagination["offset"]
-        );
+        $idCache = 'getProducts-' .
+            ($valueParamsToPagination['offset'] + $valueParamsToPagination['limit']) / $valueParamsToPagination['limit'] .
+            '-' .
+            $valueParamsToPagination['limit'];
 
-        $context = SerializationContext::create()
-            ->setSerializeNull(true);
+        $jsonProductsList = $cachePool->get(
+            $idCache,
+            function (ItemInterface $item) use ($productRepository, $valueParamsToPagination, $serializer) {
+                $item->tag('productsCache');
 
-        $jsonProductsList = $serializer->serialize([
-            "total_items_page" => count($products),
-            ...array_filter(
-                $valueParamsToPagination,
-                function ($item, $key) {
-                    return ($key !== 'limit' && $key !== 'offset') ? [$key => $item] : [];
-                },
-                ARRAY_FILTER_USE_BOTH
-            ),
-            'data' => $products,
-        ],
-            'json',
-            $context
+                $products = $productRepository->findBy(
+                    [],
+                    limit: $valueParamsToPagination['limit'],
+                    offset: $valueParamsToPagination['offset']
+                );
+
+                $context = SerializationContext::create()
+                    ->setSerializeNull(true);
+
+                return $serializer->serialize([
+                    "total_items_page" => count($products),
+                    ...array_filter(
+                        $valueParamsToPagination,
+                        function ($item, $key) {
+                            return ($key !== 'limit' && $key !== 'offset') ? [$key => $item] : [];
+                        },
+                        ARRAY_FILTER_USE_BOTH
+                    ),
+                    'data' => $products,
+                ],
+                    'json',
+                    $context
+                );
+            }
         );
 
         return new JsonResponse(
@@ -82,6 +101,9 @@ class ProductController extends AbstractController
         );
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     #[OA\Get(
         path: '/api/products/{id}',
         parameters: [
@@ -89,21 +111,35 @@ class ProductController extends AbstractController
                 name: 'id',
                 in: 'path',
                 schema: new OA\Schema(type: 'string'),
-                example: "1ee33165-a193-6d0c-be5b-a7cf585beb7d"
+                example: '1ee33165-a193-6d0c-be5b-a7cf585beb7d'
             )
         ]
     )]
     #[Route('/{id}', name: 'products_details', methods: ['GET'])]
     public function getProductsDetails(
         ?Product $product,
-        SerializerInterface $serializer
+        SerializerInterface $serializer,
+        TagAwareCacheInterface $cachePool
     ): JsonResponse
     {
         if (!$product) {
-            throw $this->createNotFoundException("Page not found");
+            throw $this->createNotFoundException('Page not found');
         }
 
-        $jsonProduct = $serializer->serialize($product, 'json');
+        $idCache = 'getProduct-'.$product->getId();
+
+        $jsonProduct = $cachePool->get(
+            $idCache,
+            function (ItemInterface $item) use ($product, $serializer) {
+                $item->tag('product-details-' . $product->getId() . '-cache');
+
+                $context = SerializationContext::create()
+                    ->setSerializeNull(true);
+
+                return $serializer->serialize($product, 'json', $context);
+
+            }
+        );
 
         return new JsonResponse(
             $jsonProduct,
