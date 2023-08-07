@@ -5,9 +5,20 @@ namespace App\Entity;
 use App\Repository\ProductRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Hateoas\Configuration\Annotation as Hateoas;
 use Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator;
 use Symfony\Component\Uid\UuidV6;
 
+/**
+ * @Hateoas\Relation(
+ *      "details",
+ *      href = @Hateoas\Route(
+ *          "products_details",
+ *          parameters={"id" = "expr(object.getId())"},
+ *          absolute = true
+ *      )
+ * )
+ */
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
 {

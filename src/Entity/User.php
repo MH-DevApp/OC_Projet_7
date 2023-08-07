@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Hateoas\Configuration\Annotation as Hateoas;
 use JMS\Serializer\Annotation\Groups;
 use Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -12,6 +13,33 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Uid\UuidV6;
 use Symfony\Component\Validator\Constraints as Assert;
 
+/**
+ * @Hateoas\Relation(
+ *  "details",
+ *  href = @Hateoas\Route(
+ *      "customer_details_user",
+ *      parameters = {"id" = "expr(object.getId())"},
+ *      absolute = true
+ *  ),
+ *  exclusion = @Hateoas\Exclusion(
+ *      groups = {"getUsersByCustomer"},
+ *      excludeIf = "expr(object.getCustomer() === null || not is_granted('USERS_VIEW', object))"
+ *  )
+ * )
+ *
+ * @Hateoas\Relation(
+ *  "delete",
+ *  href = @Hateoas\Route(
+ *      "customer_delete_user",
+ *      parameters = {"id" = "expr(object.getId())"},
+ *      absolute = true
+ *  ),
+ *  exclusion = @Hateoas\Exclusion(
+ *      groups = {"getUsersByCustomer"},
+ *      excludeIf = "expr(object.getCustomer() === null || not is_granted('USERS_VIEW', object))"
+ *  )
+ * )
+ */
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\InheritanceType('JOINED')]
 #[ORM\DiscriminatorColumn(name: 'class_name', type: 'string')]
