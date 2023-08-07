@@ -25,6 +25,9 @@ nelmio_api_doc:
                     tags:
                         - Authentication
                     summary: "Permet d'obtenir le token JWT pour s'authentifier."
+                    description: "<b>Permet d'obtenir un token JWT</b><br><br>
+                    La valeur du Token précédé par \"bearer\" doit être présente sur la clé \"Authorization\" 
+                    dans les headers de chaque requête."
                     requestBody:
                         description: "Création d'un nouveau token JWT."
                         content:
