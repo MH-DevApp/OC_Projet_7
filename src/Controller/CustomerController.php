@@ -8,6 +8,7 @@ use App\Utils\Pagination;
 use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -31,6 +32,20 @@ class CustomerController extends AbstractController
      */
     #[OA\Get(
         path: '/api/customer/users',
+        description: '<b><u>Récupération de la liste des utilisateurs</u>:</b><br><br>
+            Une pagination est mise en place. À l\'aide de query params, il est possible de saisir le numéro 
+            d\'une page et la limite de résultats par page.<br>
+            Cette liste retournera :
+            <ul>
+                <li>Nombre total d\'utilisateurs dans la collection du demandeur</li>
+                <li>Nombre total d\'utilisateurs dans la page</li>
+                <li>Nombre total de pages</li>
+                <li>La page précédente (si elle existe)</li>
+                <li>La page suivante (si elle existe)</li>
+                <li>La liste des utilisateurs avec leur détail</li>
+            </ul><br>
+            <b>NOTE: Seuls les utilisateurs présents dans la collection du demandeur (customer) seront retournés.</b>',
+        summary: 'Récupération de la liste des utilisateurs présents dans la collection du demandeur (customer).',
         parameters: [
             new OA\Parameter(
                 name: 'page',
@@ -46,6 +61,75 @@ class CustomerController extends AbstractController
                 schema: new OA\Schema(type: 'integer'),
                 example: 5
             )
+        ],
+        responses: [
+            new OA\Response(
+                response: Response::HTTP_OK,
+                description: 'Retourne la liste des utilisateurs liées au demandeur.',
+                content: new OA\JsonContent(
+                    type: 'array',
+                    items: new OA\Items(
+                        ref: new Model(
+                            type: User::class,
+                            groups: ['getUsersByCustomer']
+                        )
+                    )
+                )
+            ),
+            new OA\Response(
+                response: Response::HTTP_UNAUTHORIZED,
+                description: 'Une exception est levée, l\'utilisateur doit être connecté pour accéder aux informations demandées.',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(
+                            property: 'status',
+                            type: 'int',
+                            example: 401
+                        ),
+                        new OA\Property(
+                            property: 'message',
+                            type: 'string',
+                            example: 'JWT Token not found'
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: Response::HTTP_FORBIDDEN,
+                description: 'Une exception est levée, l\'utilisateur n\'a pas les droits pour accéder aux informations demandées.',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(
+                            property: 'status',
+                            type: 'int',
+                            example: 403
+                        ),
+                        new OA\Property(
+                            property: 'message',
+                            type: 'string',
+                            example: 'Access Denied.'
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: Response::HTTP_NOT_FOUND,
+                description: 'Une exception est levée, la page n\'existe pas.',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(
+                            property: 'status',
+                            type: 'int',
+                            example: 404
+                        ),
+                        new OA\Property(
+                            property: 'message',
+                            type: 'string',
+                            example: 'Page not found.'
+                        )
+                    ]
+                )
+            ),
         ]
     )]
     #[Route('/users', name: 'customer_users', methods: ['GET'])]
@@ -114,13 +198,86 @@ class CustomerController extends AbstractController
      */
     #[OA\Get(
         path: '/api/customer/users/{id}',
+        description: '<b><u>Récupération du détail d\'un utilisateur</u>:</b><br><br>
+            Cela aura pour effet de retourner un objet JSON contenant la clé et valeur de ses propriétés.<br><br>
+            <b>NOTE: Le détail est retourné seulement si l\'utilisateur est dans la collection du demandeur (customer).</b>',
+        summary: 'Récupération du détails d\'un utilisateur à l\'aide de son identifiant, présent dans la collection
+         du demandeur (customer).',
         parameters: [
             new OA\Parameter(
                 name: 'id',
+                description: 'Identifiant Uuid de l\'utilisateur que l\'on souhaite obtenir le détails des informations.',
                 in: 'path',
                 schema: new OA\Schema(type: 'string'),
                 example: '1ee33165-b02c-6080-b323-a7cf585beb7d'
             )
+        ],
+        responses: [
+            new OA\Response(
+                response: Response::HTTP_OK,
+                description: 'Retourne le détail de l\'utilisateur.',
+                content: new OA\JsonContent(
+                    ref: new Model(
+                        type: User::class,
+                        groups: ['getUsersByCustomer']
+                    ),
+                    type: 'object'
+                )
+            ),
+            new OA\Response(
+                response: Response::HTTP_UNAUTHORIZED,
+                description: 'Une exception est levée, l\'utilisateur doit être connecté pour accéder aux informations demandées.',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(
+                            property: 'status',
+                            type: 'int',
+                            example: 401
+                        ),
+                        new OA\Property(
+                            property: 'message',
+                            type: 'string',
+                            example: 'JWT Token not found'
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: Response::HTTP_FORBIDDEN,
+                description: 'Une exception est levée, l\'utilisateur n\'a pas les droits pour accéder aux informations demandées.',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(
+                            property: 'status',
+                            type: 'int',
+                            example: 403
+                        ),
+                        new OA\Property(
+                            property: 'message',
+                            type: 'string',
+                            example: 'Access Denied.'
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: Response::HTTP_NOT_FOUND,
+                description: 'Une exception est levée, la page n\'existe pas.',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(
+                            property: 'status',
+                            type: 'int',
+                            example: 404
+                        ),
+                        new OA\Property(
+                            property: 'message',
+                            type: 'string',
+                            example: 'Page not found.'
+                        )
+                    ]
+                )
+            ),
         ]
     )]
     #[Route('/users/{id}', name: 'customer_details_user', methods: ['GET'])]
@@ -165,6 +322,13 @@ class CustomerController extends AbstractController
      */
     #[OA\Post(
         path: '/api/customer/users',
+        description: '<b><u>Ajout d\'un nouvel utilisateur</u>:</b><br><br>
+            Cela aura pour effet d\'ajouter un nouvel utilisateur dans la collection du demandeur (customer).<br>
+            L\'adresse email doit être unique, une exception sera levée le cas échéant. Le numéro de téléphone et l\'adresse
+            ne sont pas requis.<br><br>
+            <b>NOTE: Il n\'est pas demandé de préciser l\'identifiant du demandeur (customer), celui-ci sera
+            récupéré automatique via les propriétés de la requête.</b>',
+        summary: 'Ajout d\'un nouvel utilisateur dans la collection du demandeur (customer).',
         requestBody: new OA\RequestBody(
             content: new OA\JsonContent(
                 required: [
@@ -211,6 +375,79 @@ class CustomerController extends AbstractController
                 type: 'object'
             )
         ),
+        responses: [
+            new OA\Response(
+                response: Response::HTTP_CREATED,
+                description: 'Retourne le détail du nouvel utilisateur.',
+                headers: [
+                    new OA\Header(
+                        header: 'Location',
+                        description: 'L\URL pointant vers le détails du nouvel utilisateur.',
+                        schema: new OA\Schema(
+                            type: 'string',
+                            example: 'https://localhost:3000/api/customer/users/1ee35342-a565-6ad0-8c98-29ef8289788e'
+                        )
+                    )
+                ],
+                content: new OA\JsonContent(
+                    ref: new Model(
+                        type: User::class,
+                        groups: ['getUsersByCustomer']
+                    ),
+                    type: 'object'
+                )
+            ),
+            new OA\Response(
+                response: Response::HTTP_BAD_REQUEST,
+                description: 'Une exception est levée, une ou plusieurs erreurs de validation sur l\'envoi 
+                des données a été détecté.',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(
+                            property: 'email',
+                            type: 'string',
+                            example: 'L\'adresse email existe déjà, veuillez en saisir une nouvelle.'
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: Response::HTTP_UNAUTHORIZED,
+                description: 'Une exception est levée, l\'utilisateur doit être connecté pour accéder aux informations demandées.',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(
+                            property: 'status',
+                            type: 'int',
+                            example: 401
+                        ),
+                        new OA\Property(
+                            property: 'message',
+                            type: 'string',
+                            example: 'JWT Token not found'
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: Response::HTTP_FORBIDDEN,
+                description: 'Une exception est levée, l\'utilisateur n\'a pas les droits pour accéder aux informations demandées.',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(
+                            property: 'status',
+                            type: 'int',
+                            example: 403
+                        ),
+                        new OA\Property(
+                            property: 'message',
+                            type: 'string',
+                            example: 'Access Denied.'
+                        )
+                    ]
+                )
+            )
+        ]
     )]
     #[Route('/users', name: 'customer_add_user', methods: ['POST'])]
     public function addUser(
@@ -294,12 +531,61 @@ class CustomerController extends AbstractController
      */
     #[OA\Delete(
         path: '/api/customer/users/{id}',
+        description: '<b><u>Suppression d\'un utilisateur</u>:</b><br><br>
+            Cela aura pour effet de supprimer un utilisateur de la collection du demandeur (customer).<br><br>
+            <b>NOTE: Seuls les utilisateurs présents dans la collection du demandeur (customer) peuvent être supprimés.</b>',
+        summary: 'Suppression d\'un utilisateur de la collection du demandeur (customer).',
         parameters: [
             new OA\Parameter(
                 name: 'id',
+                description: 'Identifiant Uuid de l\'utilisateur que l\'on souhaite supprimer définitivement.',
                 in: 'path',
                 schema: new OA\Schema(type: 'string'),
                 example: '1ee33165-b02c-6080-b323-a7cf585beb7d'
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: Response::HTTP_NO_CONTENT,
+                description: 'Suppression de l\'utilisateur avec succès. Renvoie uniquement un status code 204 
+                sans contenu.',
+                content: null
+            ),
+            new OA\Response(
+                response: Response::HTTP_UNAUTHORIZED,
+                description: 'Une exception est levée, l\'utilisateur doit être connecté pour accéder aux informations demandées.',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(
+                            property: 'status',
+                            type: 'int',
+                            example: 401
+                        ),
+                        new OA\Property(
+                            property: 'message',
+                            type: 'string',
+                            example: 'JWT Token not found'
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: Response::HTTP_FORBIDDEN,
+                description: 'Une exception est levée, l\'utilisateur n\'a pas les droits pour accéder aux informations demandées.',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(
+                            property: 'status',
+                            type: 'int',
+                            example: 403
+                        ),
+                        new OA\Property(
+                            property: 'message',
+                            type: 'string',
+                            example: 'Access Denied.'
+                        )
+                    ]
+                )
             )
         ]
     )]
