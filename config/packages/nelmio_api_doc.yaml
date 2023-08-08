@@ -1,0 +1,102 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: "BileMo"
+            description: "
+                <b><u>Projet 7 de la formation PHP/Symfony d'Openclassrooms</u>.</b> <br><br>
+                <b><u>API Documentation</u> :</b><br><br>
+                L'API permet :
+                 <ul>
+                    <li>- Consulter le catalogue de produits</li>
+                    <li>- Consulter le détails d'un produit</li>
+                    <li>- Consulter la liste des utilisateurs liée à un client</li>
+                    <li>- Consulter le détails d'un utilisateur inscrit liée à un client</li>
+                    <li>- Ajouter un nouvel utilisateur lié à un client</li>
+                    <li>- Supprimer un utilisateur ajouté par un client</li>
+                </ul>
+                Seuls les utilisateurs inscrits et référencés peuvent accéder à l'API.
+            "
+            version: 1.0.0
+
+        paths:
+            /api/login_check:
+                post:
+                    operationId: postCredentialsItem
+                    tags:
+                        - Authentication
+                    summary: "Permet d'obtenir le token JWT pour s'authentifier."
+                    description: "<b>Permet d'obtenir un token JWT</b><br><br>
+                    La valeur du Token précédé par \"bearer\" doit être présente sur la clé \"Authorization\" 
+                    dans les headers de chaque requête."
+                    requestBody:
+                        description: "Création d'un nouveau token JWT."
+                        content:
+                            application/json:
+                                schema:
+                                    type: object
+                                    properties:
+                                        username:
+                                            type: string
+                                            default: "customer@oc-p7.fr"
+                                        password:
+                                            type: string
+                                            default: "123456"
+                    responses:
+                        "200":
+                            description: "
+                                Identifiant et mot de passe d'authentification corrects.<br>
+                                Récupération du token JWT.
+                            "
+                            content:
+                                application/json:
+                                    schema:
+                                        type: object
+                                        properties:
+                                            token:
+                                                type: string
+                                                readOnly: true
+                                                example: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.exJpYXQiOjE2OTEyMzI0NzMsImV4cCI6MTY5MTIzNjA3Mywicm9xZXMiOlsiUk9MRV9VU0VSIl0sInVzZXJuYW1lIjoiY3VzdG9tZXJAb2MtcDcuZnIifQ.tVAgHQGqux3djeEKw5dgIrkF92qu9WifXN2i7U9s0FuTIeWNzsem6icX5uHhvXXWe4uOmJ46ERlTSGYVvc7yrj3042UNniKZ7bbsS5u4YI-fYSGA5QEZp2WyHoChpStcZxKYQ1J3GoTkqkJinW6T0r_XMLBxhJKsCnfI_LaPsNVEiWwhjP27rX0tfGOMQ908zyQqV71XSaH2_P-OPws-dXqxmpdUuV7Ac8GI8Zs2A1iwOCjyYA7HAjFL5izP5yEGQEKxhQe7PlDrLuqHQsbo83YASwZDFPuFAisMh871j51WdqOeTHwR3CjJT-2YDjXvJwrhyODIWL8qXH-pa49N4rgp76d3sR4dT3ssm1qDlyad2gTuYLZQTbGCZ6sL-dZZhbBn7KEmo5-bTR5gPWnxgsffZw-Dx-m4SWHeVKh8Z3Ty9N3NZ3Kz93-7-H6xadgAYIXbNKiqKL4ttJNIJ93lZ7DzwLoewhYnkkB18ArArOJtTo9rBIAoq9A8WYJ9bm5ig2Q8Ugk89x175ivawExVY-rIa9A2BlMEXBy4nFaBynWcSn-PEHkPeWrWDRtENQf_fPSP83087EMd31InS-iKfVYmfGZmY536C9Q7DwLgH-453boES1nUTESAYpLlyV9AyR_ihQf-FR1RYvTdRAXrRLfXZrnuXgL3gwPbJMGBeJ0"
+                        "400":
+                            description: "Clé d'une propriété manquante ou format JSON invalide."
+                            content:
+                                application/json:
+                                    schema:
+                                        type: object
+                                        properties:
+                                            code:
+                                                type: int
+                                                readOnly: true
+                                                example: 400
+                                            message:
+                                                type: string
+                                                readOnly: true
+                                                example: "The key \"username\" must be provided."
+                        "401":
+                            description: "Identifiant ou mot de passe incorrect."
+                            content:
+                                application/json:
+                                    schema:
+                                        type: object
+                                        properties:
+                                            code:
+                                                type: int
+                                                readOnly: true
+                                                example: 401
+                                            message:
+                                                type: string
+                                                readOnly: true
+                                                example: "Identifiants invalides."
+
+        components:
+            securitySchemes:
+                bearerAuth:
+                    type: apiKey
+                    in: header
+                    name: Authorization
+
+        security:
+            - bearerAuth: []
+
+    areas: # to filter documented areas
+        path_patterns:
+            - ^/api(?!/doc$) # Accepts routes under /api except /api/doc

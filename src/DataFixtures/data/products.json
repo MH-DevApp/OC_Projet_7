@@ -1,0 +1,296 @@
+[
+  {
+    "brand": "NexTech",
+    "model": "Lumina Z2",
+    "description": "Un smartphone puissant avec un processeur dernier cri et un système de caméra polyvalent.",
+    "price": 999.99
+  },
+  {
+    "brand": "Lunex",
+    "model": "Orbit X12",
+    "description": "Un téléphone élégant avec un écran lumineux et des performances impressionnantes.",
+    "price": 899.50
+  },
+  {
+    "brand": "MobiMax",
+    "model": "Astral 6",
+    "description": "Un téléphone abordable avec une grande autonomie de batterie et une interface conviviale.",
+    "price": 799.00
+  },
+  {
+    "brand": "EvoTech",
+    "model": "Nova 9 Pro",
+    "description": "Un téléphone haut de gamme avec un écran magnifique et des fonctionnalités de pointe.",
+    "price": 899.99
+  },
+  {
+    "brand": "Futura",
+    "model": "Spectra M7",
+    "description": "Un téléphone premium avec une caméra haute résolution et un design élégant.",
+    "price": 799.50
+  },
+  {
+    "brand": "TechVizion",
+    "model": "Fusion X5",
+    "description": "Un smartphone innovant avec un affichage 3D et une sécurité avancée.",
+    "price": 899.00
+  },
+  {
+    "brand": "InfiniTech",
+    "model": "Voyager Z3",
+    "description": "Un téléphone haut de gamme avec une autonomie de batterie exceptionnelle et une expérience utilisateur fluide.",
+    "price": 999.00
+  },
+  {
+    "brand": "Xcelerate",
+    "model": "Vortex 7",
+    "description": "Un téléphone élégant avec une performance rapide et une interface utilisateur intuitive.",
+    "price": 699.99
+  },
+  {
+    "brand": "PlusUltra",
+    "model": "Zenith 11",
+    "description": "Un téléphone puissant avec un grand écran et des capacités de jeu avancées.",
+    "price": 599.50
+  },
+  {
+    "brand": "Luxor",
+    "model": "Apex 5G",
+    "description": "Un téléphone 5G élégant avec une caméra de qualité professionnelle.",
+    "price": 449.00
+  },
+  {
+    "brand": "Eclipse",
+    "model": "Titanium 8",
+    "description": "Un téléphone compact avec une grande puissance et une prise en main confortable.",
+    "price": 599.00
+  },
+  {
+    "brand": "Astralis",
+    "model": "Aurea 12",
+    "description": "Un téléphone élégant avec des fonctionnalités photo avancées et un écran OLED.",
+    "price": 349.99
+  },
+  {
+    "brand": "Orion",
+    "model": "Astra X",
+    "description": "Un smartphone abordable avec un écran AMOLED et une bonne autonomie de batterie.",
+    "price": 499.50
+  },
+  {
+    "brand": "Xenon",
+    "model": "Infinite Pro",
+    "description": "Un téléphone de jeu avec des performances optimisées et une connectivité 5G.",
+    "price": 699.00
+  },
+  {
+    "brand": "Quantum",
+    "model": "Zephyr 5",
+    "description": "Un téléphone équilibré avec un écran haute résolution et une caméra polyvalente.",
+    "price": 399.00
+  },
+  {
+    "brand": "Elysium",
+    "model": "Serenity 5G",
+    "description": "Un téléphone avec une caméra améliorée pour la photographie de nuit.",
+    "price": 499.99
+  },
+  {
+    "brand": "Celestia",
+    "model": "Luminor X",
+    "description": "Un smartphone avec un design élégant et des fonctionnalités de sécurité avancées.",
+    "price": 599.50
+  },
+  {
+    "brand": "Euphoria",
+    "model": "Nexus 7",
+    "description": "Un téléphone résistant à l'eau et à la poussière avec une grande autonomie de batterie.",
+    "price": 699.00
+  },
+  {
+    "brand": "NovaTech",
+    "model": "Mystic 10",
+    "description": "Un téléphone polyvalent avec une grande capacité de stockage et un écran éclatant.",
+    "price": 549.00
+  },
+  {
+    "brand": "Quantum",
+    "model": "Stellar 9",
+    "description": "Un smartphone avec un écran 120 Hz pour des animations fluides.",
+    "price": 349.50
+  },
+  {
+    "brand": "Xenon",
+    "model": "Optimum 8",
+    "description": "Un téléphone abordable avec un design ergonomique et un bon appareil photo.",
+    "price": 199.00
+  },
+  {
+    "brand": "NexTech",
+    "model": "Eclipse 8",
+    "description": "Un smartphone avec des fonctionnalités de réalité virtuelle intégrées.",
+    "price": 349.99
+  },
+  {
+    "brand": "Zephyr",
+    "model": "Trinity 6",
+    "description": "Un téléphone compact avec une performance fiable et un design moderne.",
+    "price": 149.50
+  },
+  {
+    "brand": "Celestia",
+    "model": "Aurora 5G",
+    "description": "Un téléphone avec une grande capacité de stockage pour vos médias.",
+    "price": 399.00
+  },
+  {
+    "brand": "Orbit",
+    "model": "Quantum 6",
+    "description": "Un smartphone abordable avec une interface utilisateur fluide.",
+    "price": 249.00
+  },
+  {
+    "brand": "Astral",
+    "model": "Lunaris 8",
+    "description": "Un téléphone élégant avec une grande autonomie de batterie.",
+    "price": 149.99
+  },
+  {
+    "brand": "Nexa",
+    "model": "Evolv X",
+    "description": "Un smartphone avec des fonctionnalités de réalité augmentée avancées.",
+    "price": 399.50
+  },
+  {
+    "brand": "Evo",
+    "model": "Galacta 7",
+    "description": "Un téléphone 5G avec des performances exceptionnelles et une caméra de qualité supérieure.",
+    "price": 299.00
+  },
+  {
+    "brand": "Luminex",
+    "model": "Vivid Pro",
+    "description": "Un téléphone avec un écran vibrant pour une expérience visuelle améliorée.",
+    "price": 349.99
+  },
+  {
+    "brand": "Optima",
+    "model": "Titan 9",
+    "description": "Un smartphone abordable avec une grande autonomie de batterie.",
+    "price": 499.00
+  },
+  {
+    "brand": "Ultrix",
+    "model": "Nebula 8",
+    "description": "Un téléphone élégant avec des fonctionnalités d'IA intégrées.",
+    "price": 349.50
+  },
+  {
+    "brand": "Galaxium",
+    "model": "Zenith Pro",
+    "description": "Un téléphone avec un design premium et une expérience utilisateur fluide.",
+    "price": 599.00
+  },
+  {
+    "brand": "AstroTech",
+    "model": "Astral 7",
+    "description": "Un smartphone avec un écran incurvé et une performance fiable.",
+    "price": 499.50
+  },
+  {
+    "brand": "Elysium",
+    "model": "Nova 10",
+    "description": "Un téléphone avec une caméra améliorée pour la photographie en basse lumière.",
+    "price": 599.00
+  },
+  {
+    "brand": "Futuris",
+    "model": "Eclipse 9",
+    "description": "Un smartphone avec une grande autonomie de batterie et des fonctionnalités d'IA.",
+    "price": 699.99
+  },
+  {
+    "brand": "Luxor",
+    "model": "Voyager Z5",
+    "description": "Un téléphone avec une caméra haute résolution pour des photos de qualité professionnelle.",
+    "price": 599.50
+  },
+  {
+    "brand": "Lunaris",
+    "model": "Orbit X10",
+    "description": "Un téléphone abordable avec un écran lumineux et des fonctionnalités de jeu.",
+    "price": 449.00
+  },
+  {
+    "brand": "TechVizion",
+    "model": "Fusion X6",
+    "description": "Un smartphone innovant avec un affichage 3D et une sécurité avancée.",
+    "price": 599.00
+  },
+  {
+    "brand": "EvoTech",
+    "model": "Nova 9",
+    "description": "Un téléphone haut de gamme avec un écran magnifique et des fonctionnalités avancées.",
+    "price": 799.50
+  },
+  {
+    "brand": "Futura",
+    "model": "Spectra M5",
+    "description": "Un téléphone premium avec une caméra haute résolution et un design élégant.",
+    "price": 699.00
+  },
+  {
+    "brand": "PlusUltra",
+    "model": "Zenith 10",
+    "description": "Un téléphone puissant avec un grand écran pour une expérience multimédia exceptionnelle.",
+    "price": 549.00
+  },
+  {
+    "brand": "NovaTech",
+    "model": "Mystic 9",
+    "description": "Un téléphone polyvalent avec une grande autonomie de batterie et un écran éclatant.",
+    "price": 349.50
+  },
+  {
+    "brand": "Quantum",
+    "model": "Zephyr 4",
+    "description": "Un smartphone équilibré avec un écran haute résolution et une caméra polyvalente.",
+    "price": 249.00
+  },
+  {
+    "brand": "Celestia",
+    "model": "Aurora 4G",
+    "description": "Un téléphone avec une grande capacité de stockage pour vos médias.",
+    "price": 399.99
+  },
+  {
+    "brand": "Orbit",
+    "model": "Quantum 5",
+    "description": "Un smartphone abordable avec une interface utilisateur fluide.",
+    "price": 199.00
+  },
+  {
+    "brand": "Astral",
+    "model": "Lunaris 7",
+    "description": "Un téléphone élégant avec une grande autonomie de batterie.",
+    "price": 299.99
+  },
+  {
+    "brand": "Evo",
+    "model": "Galacta 6",
+    "description": "Un téléphone 5G avec des performances exceptionnelles et une caméra de qualité supérieure.",
+    "price": 399.50
+  },
+  {
+    "brand": "Luminex",
+    "model": "Vivid 9",
+    "description": "Un téléphone avec un écran vibrant pour une expérience visuelle améliorée.",
+    "price": 499.00
+  },
+  {
+    "brand": "Optima",
+    "model": "Titan 8",
+    "description": "Un smartphone abordable avec une grande autonomie de batterie.",
+    "price": 349.50
+  }
+]
