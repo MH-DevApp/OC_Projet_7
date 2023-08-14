@@ -213,6 +213,7 @@ Default accounts:
 - Username: `user@oc-p7.fr` (User) or `customer@oc-p7.fr` (Customer)
 - Password for all users: `123456`
 
+
 ### ONLINE
 
 If you want, you can try this application online at : https://p7.mehdi-haddou.fr
