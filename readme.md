@@ -120,6 +120,8 @@ The following PHP extensions need to be installed and enabled :
 
 The website is available at the url: https://localhost:3000
 
+The documentation is available at : https://localhost:3000/api/doc
+
 ### With Docker
 ___
 #### Requirements
@@ -191,6 +193,8 @@ Once your Docker configuration is up and ready, you can follow the instructions 
 
 The website is available at the url: https://localhost:3000
 
+The documentation is available at : https://localhost:3000/api/doc
+
 #### DBMS
 
 You can access the DBMS (phpMyAdmin) to view and configure your database. Please go to the url: http://localhost:8080.
@@ -208,3 +212,8 @@ This assumes that you have set up a Docker container running phpMyAdmin and conf
 Default accounts:
 - Username: `user@oc-p7.fr` (User) or `customer@oc-p7.fr` (Customer)
 - Password for all users: `123456`
+
+
+### ONLINE
+
+If you want, you can try this application online at : https://p7.mehdi-haddou.fr/api/doc
