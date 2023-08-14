@@ -216,4 +216,4 @@ Default accounts:
 
 ### ONLINE
 
-If you want, you can try this application online at : https://p7.mehdi-haddou.fr
+If you want, you can try this application online at : https://p7.mehdi-haddou.fr/api/doc
